@@ -1,0 +1,7 @@
+# Copy this to terraform.tfvars and fill in your values
+# terraform.tfvars is gitignored — never commit real passwords
+
+aws_region    = "ap-south-1"
+project       = "shopapi"
+env           = "dev"
+db_password   = "YourStrongPassword123!"   # change this
