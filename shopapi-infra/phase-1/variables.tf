@@ -32,7 +32,7 @@ variable "ami_id" {
   description = "Amazon Linux 2023 AMI — update if region changes"
   type        = string
   # Amazon Linux 2023 in ap-south-1 (free tier eligible)
-  default     = "ami-0f58b397bc5c1f2e8"
+  default     = "ami-09ed39e30153c3bf9"
 }
 
 variable "instance_type" {
