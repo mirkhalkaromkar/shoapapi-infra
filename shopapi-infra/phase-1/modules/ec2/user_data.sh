@@ -16,10 +16,10 @@ npm --version
 # ── 3. Clone the app from GitHub ─────────────────────────
 cd /home/ec2-user
 git clone https://github.com/mirkhalkaromkar/shopapi.git
-cd shopapi
+cd shopapi/shopapi
 
 # ── 4. Install dependencies ───────────────────────────────
-npm ci --only=production
+npm install --omit=dev
 
 # ── 5. Write .env file ────────────────────────────────────
 # In Phase 2 we will replace this with SSM Parameter Store reads.
@@ -36,12 +36,11 @@ REDIS_PORT=6379
 SQS_QUEUE_URL=
 AWS_REGION=ap-south-1
 ENVEOF
-
 # ── 6. Run DB schema + seed ───────────────────────────────
 # Wait for RDS to be reachable (it may take a minute after Terraform apply)
 echo "Waiting for RDS to be reachable..."
 for i in {1..10}; do
-  if mysql -h "${db_host}" -u "${db_username}" -p"${db_password}" -e "SELECT 1;" 2>/dev/null; then
+  if mariadb105 -h "${db_host}" -u "${db_username}" -p"${db_password}" -e "SELECT 1;" 2>/dev/null; then
     echo "RDS is up."
     break
   fi
@@ -50,9 +49,9 @@ for i in {1..10}; do
 done
 
 # Install mysql client for schema init
-dnf install -y mysql
+dnf install -y mariadb105
 
-mysql -h "${db_host}" -u "${db_username}" -p"${db_password}" < /home/ec2-user/shopapi/init.sql
+mariadb105 -h "${db_host}" -u "${db_username}" -p"${db_password}" < /home/ec2-user/shopapi/shopapi/init.sql
 echo "Schema + seed data loaded."
 
 # ── 7. Set up systemd service (auto-restart on crash) ────
@@ -64,11 +63,11 @@ After=network.target
 [Service]
 Type=simple
 User=ec2-user
-WorkingDirectory=/home/ec2-user/shopapi
+WorkingDirectory=/home/ec2-user/shopapi/shopapi
 ExecStart=/usr/bin/node server.js
 Restart=on-failure
 RestartSec=5
-EnvironmentFile=/home/ec2-user/shopapi/.env
+EnvironmentFile=/home/ec2-user/shopapi/shopapi/.env
 StandardOutput=journal
 StandardError=journal
 
@@ -76,9 +75,3 @@ StandardError=journal
 WantedBy=multi-user.target
 SVCEOF
 
-systemctl daemon-reload
-systemctl enable shopapi
-systemctl start shopapi
-
-echo "=== Bootstrap complete at $(date) ==="
-echo "ShopAPI running on port 3000"
