@@ -70,3 +70,8 @@ StandardError=journal
 WantedBy=multi-user.target
 SVCEOF
 
+systemctl daemon-reload
+systemctl enable shopapi
+systemctl start shopapi
+echo "=== Bootstrap complete at $(date) ==="
+
