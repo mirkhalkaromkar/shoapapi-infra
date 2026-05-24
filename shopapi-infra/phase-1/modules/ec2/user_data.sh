@@ -8,7 +8,7 @@ echo "=== ShopAPI bootstrap started at $(date) ==="
 dnf update -y
 
 # ── 2. Install Node.js 20 (LTS) ──────────────────────────
-dnf install -y nodejs npm git
+dnf install -y nodejs npm git mariadb105
 
 node --version
 npm --version
@@ -40,7 +40,7 @@ ENVEOF
 # Wait for RDS to be reachable (it may take a minute after Terraform apply)
 echo "Waiting for RDS to be reachable..."
 for i in {1..10}; do
-  if mariadb105 -h "${db_host}" -u "${db_username}" -p"${db_password}" -e "SELECT 1;" 2>/dev/null; then
+  if mysql -h "${db_host}" -u "${db_username}" -p"${db_password}" -e "SELECT 1;" 2>/dev/null; then
     echo "RDS is up."
     break
   fi
@@ -48,12 +48,7 @@ for i in {1..10}; do
   sleep 15
 done
 
-# Install mysql client for schema init
-dnf install -y mariadb105
-
-mariadb105 -h "${db_host}" -u "${db_username}" -p"${db_password}" < /home/ec2-user/shopapi/shopapi/init.sql
-echo "Schema + seed data loaded."
-
+mysql -h "${db_host}" -u "${db_username}" -p"${db_password}" < /home/ec2-user/shopapi/shopapi/init.sql
 # ── 7. Set up systemd service (auto-restart on crash) ────
 cat > /etc/systemd/system/shopapi.service << 'SVCEOF'
 [Unit]
@@ -62,7 +57,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=ec2-user
+User=root
 WorkingDirectory=/home/ec2-user/shopapi/shopapi
 ExecStart=/usr/bin/node server.js
 Restart=on-failure
