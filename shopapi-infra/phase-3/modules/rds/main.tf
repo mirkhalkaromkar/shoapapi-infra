@@ -17,7 +17,7 @@ resource "aws_db_instance" "mysql" {
   # Free tier eligible
   engine               = "mysql"
   engine_version       = "8.0"
-  instance_class       = "db.t2.micro"      # free tier: 750 hrs/month
+  instance_class       = "db.t3.micro"      # free tier: 750 hrs/month
   allocated_storage    = 20                 # free tier: 20 GB
   storage_type         = "gp2"
 
