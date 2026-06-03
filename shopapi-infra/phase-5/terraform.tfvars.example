@@ -1,0 +1,7 @@
+aws_region    = "ap-south-1"
+project       = "shopapi"
+env           = "dev"
+db_password   = "YourStrongPassword123!"
+alert_email   = "omkar@gmail.com"
+github_repo   = "mirkhalkaromkar/shopapi"
+github_branch = "main"
