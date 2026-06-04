@@ -1,5 +1,3 @@
-# ── CloudFront Distribution ───────────────────────────────
-# Phase 6: serves both frontend (/) and product images (/images/*)
 resource "aws_cloudfront_distribution" "main" {
   enabled             = true
   comment             = "${var.project}-${var.env} CDN"
@@ -19,23 +17,69 @@ resource "aws_cloudfront_distribution" "main" {
     origin_access_control_id = var.images_oac_id
   }
 
-  # Default behaviour — serve React frontend
-  default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
+  # Origin 3 — ALB (API)
+  origin {
+    domain_name = var.alb_dns
+    origin_id   = "alb-api"
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  # /products* → ALB
+  ordered_cache_behavior {
+    path_pattern           = "/products*"
+    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "frontend-s3"
+    target_origin_id       = "alb-api"
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
-    default_ttl            = 300
-    max_ttl                = 86400
+    default_ttl            = 0
+    max_ttl                = 0
+    forwarded_values {
+      query_string = true
+      headers      = ["*"]
+      cookies { forward = "all" }
+    }
+  }
 
+  # /categories* → ALB
+  ordered_cache_behavior {
+    path_pattern           = "/categories*"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "alb-api"
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 0
+    forwarded_values {
+      query_string = true
+      headers      = ["*"]
+      cookies { forward = "all" }
+    }
+  }
+
+  # /health → ALB
+  ordered_cache_behavior {
+    path_pattern           = "/health"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "alb-api"
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 0
     forwarded_values {
       query_string = false
       cookies { forward = "none" }
     }
   }
 
-  # /images/* — serve product images
+  # /images/* → S3 images
   ordered_cache_behavior {
     path_pattern           = "/images/*"
     allowed_methods        = ["GET", "HEAD"]
@@ -45,20 +89,38 @@ resource "aws_cloudfront_distribution" "main" {
     min_ttl                = 0
     default_ttl            = 86400
     max_ttl                = 604800
-
     forwarded_values {
       query_string = false
       cookies { forward = "none" }
     }
   }
 
-  # SPA routing — return index.html for 404s (React Router)
+  # Default → React frontend (S3)
+  default_cache_behavior {
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "frontend-s3"
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 300
+    max_ttl                = 86400
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+  }
+
   custom_error_response {
     error_code         = 404
     response_code      = 200
     response_page_path = "/index.html"
   }
 
+  custom_error_response {
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
   restrictions {
     geo_restriction { restriction_type = "none" }
   }
