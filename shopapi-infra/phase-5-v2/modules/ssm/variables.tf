@@ -8,3 +8,4 @@ variable "db_password" {
   sensitive = true
 }
 variable "sqs_queue_url" { type = string }
+variable "redis_host"    { type = string }
