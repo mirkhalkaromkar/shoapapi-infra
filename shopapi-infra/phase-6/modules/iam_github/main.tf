@@ -64,7 +64,7 @@ resource "aws_iam_role_policy" "github_actions" {
       {
         # CloudFront — invalidate cache after frontend deploy (Phase 6)
         Effect   = "Allow"
-        Action   = ["cloudfront:CreateInvalidation"]
+        Action   = ["cloudfront:CreateInvalidation","cloudfront:GetDistribution"]
         Resource = "*"
       }
     ]
