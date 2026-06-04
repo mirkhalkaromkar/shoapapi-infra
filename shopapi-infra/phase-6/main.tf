@@ -101,6 +101,7 @@ module "cloudfront" {
   frontend_oac_id        = module.frontend.oac_id
   images_bucket_domain   = module.s3.bucket_regional_domain
   images_oac_id          = module.s3.oac_id
+  alb_dns                = module.alb.alb_dns
 }
 
 module "alb" {
