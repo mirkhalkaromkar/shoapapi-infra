@@ -107,9 +107,9 @@ In the **shopapi** GitHub repository → Settings → Secrets and variables → 
 
 | Variable name | Value |
 |---|---|
-| `ALB_URL` | CloudFront domain, e.g. `https://d1xxxxx.cloudfront.net` |
+| `CLOUDFRONT_URL` | CloudFront domain, e.g. `https://d1xxxxx.cloudfront.net` |
 
-> Note: Set `ALB_URL` as a **variable** (not a secret) and set it to the CloudFront URL, not the ALB URL directly. This avoids mixed content errors since CloudFront proxies API calls over HTTPS.
+> Note: Set `CLOUDFRONT_URL` as a **variable** (not a secret) and set it to the CloudFront URL, not the ALB URL directly. This avoids mixed content errors since CloudFront proxies API calls over HTTPS.
 
 ### Step 6 — Trigger first deployment
 
