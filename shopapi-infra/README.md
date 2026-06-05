@@ -227,6 +227,7 @@ CloudWatch dashboard: `shopapi-dev`
 Email alerts via SNS to the configured `alert_email`.
 
 ---
+Note: There are two directories phase-5(phase-5-v2 and pahse-5) so phase-5 directory include pipeline setup through AWS  using services like CodeDeploy, CodeBuild and CodePipeline and phase-5-v2 directory is pipeline setup directly through github actions. We can choose as per our requirements. 
 
 ## Tech stack
 
